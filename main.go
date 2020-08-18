@@ -26,7 +26,7 @@ func main() {
 		tm.MoveCursor(1, 1)
 
 		c.show()
-
+		// fmt.Println(c.State)
 		tm.Flush() // Call it every time at the end of rendering
 
 		time.Sleep(time.Second)
@@ -34,11 +34,18 @@ func main() {
 }
 
 func (c Conway) born() {
+	initialState := make([][]string, c.Size)
 	for i := 0; i < c.Size; i++ {
-		for j := 0; j < c.Size; j++ {
-			c.State[i][j] = " "
+		initialState[i] = make([]string, c.Size)
+	}
+
+	for i, innerArray := range c.State {
+		for j := range innerArray {
+			initialState[i][j] = "x"
 		}
 	}
+
+	c.State = initialState
 }
 
 func live() {
@@ -46,11 +53,21 @@ func live() {
 }
 
 func (c Conway) show() {
-	for i := 0; i < c.Size; i++ {
+	// for i := 0; i < c.Size; i++ {
+	// 	row := ""
+	// 	for j := 0; j < c.Size; j++ {
+	// 		row += c.State[i][j]
+	// 	}
+	// 	tm.Println(row)
+	// }
+	for i, innerArray := range c.State {
 		row := ""
-		for j := 0; j < c.Size; j++ {
+		for j := range innerArray {
 			row += c.State[i][j]
+			tm.Println(c.State[i][j])
 		}
 		tm.Println(row)
+		tm.Println("x")
 	}
+	// fmt.Println(c.State)
 }
