@@ -34,23 +34,19 @@ func main() {
 			iteration++
 		}
 		tm.Println("Iteration: ", iteration)
+		tm.Flush() // Call it every time at the end of rendering
 		if !moved {
 			tm.Println("End of simulation")
 			break
 		}
-		tm.Flush() // Call it every time at the end of rendering
 		time.Sleep(time.Second * 1)
 	}
-}
-
-func getRandomForms() []string {
-	return []string{"2-2", "3-3", "4-1", "4-2", "4-3"}
 }
 
 func born() Conway {
 	c := Conway{Size: 10}
 
-	rc := getRandomForms()
+	rc := getRandomCells(10, c.Size)
 
 	c.State = make([][]string, c.Size)
 	for i := 0; i < c.Size; i++ {
@@ -59,8 +55,8 @@ func born() Conway {
 
 	for i, innerArray := range c.State {
 		for j := range innerArray {
-			s := strconv.Itoa(i) + "-" + strconv.Itoa(j)
-			if isIn(rc, s) {
+			p := strconv.Itoa(i) + "-" + strconv.Itoa(j)
+			if isIn(rc, p) {
 				c.State[i][j] = cell
 			} else {
 				c.State[i][j] = space
@@ -71,30 +67,6 @@ func born() Conway {
 	return c
 }
 
-// func born() Conway {
-// 	c := Conway{Size: 10}
-
-// 	rc := getRandomCells(10, c.Size)
-
-// 	c.State = make([][]string, c.Size)
-// 	for i := 0; i < c.Size; i++ {
-// 		c.State[i] = make([]string, c.Size)
-// 	}
-
-// 	for i, innerArray := range c.State {
-// 		for j := range innerArray {
-// 			s := string(i) + "-" + string(j)
-// 			if isIn(rc, s) {
-// 				c.State[i][j] = cell
-// 			} else {
-// 				c.State[i][j] = space
-// 			}
-// 		}
-// 	}
-
-// 	return c
-// }
-
 func getRandomCells(q int, s int) []string {
 	rand.Seed(time.Now().UTC().UnixNano())
 	rc := make([]string, q)
@@ -102,9 +74,9 @@ func getRandomCells(q int, s int) []string {
 		for {
 			r1 := rand.Intn(s)
 			r2 := rand.Intn(s)
-			s := string(r1) + "-" + string(r2)
-			if !isIn(rc, s) {
-				rc = append(rc, s)
+			p := strconv.Itoa(r1) + "-" + strconv.Itoa(r2)
+			if !isIn(rc, p) {
+				rc[i] = p
 				break
 			}
 		}
@@ -137,7 +109,6 @@ func getCells(state [][]string) []string {
 
 func live(c Conway) (Conway, bool) {
 	cells := getCells(c.State)
-
 	moved := false
 	for i, innerArray := range c.State {
 		for j := range innerArray {
