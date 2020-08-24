@@ -11,6 +11,8 @@ import (
 const cell = "x"
 const space = " "
 
+var population = 10
+
 type Conway struct {
 	Size   int
 	State  [][]string
@@ -29,12 +31,13 @@ func main() {
 		tm.MoveCursor(1, 1)
 
 		show(c)
+		tm.Println("Iteration: ", iteration)
+		tm.Println("Population: ", population)
 		c, moved = live(c)
 		if moved {
 			iteration++
 		}
-		tm.Println("Iteration: ", iteration)
-		tm.Flush() // Call it every time at the end of rendering
+		tm.Flush()
 		if !moved {
 			tm.Println("End of simulation")
 			break
@@ -46,7 +49,7 @@ func main() {
 func born() Conway {
 	c := Conway{Size: 10}
 
-	rc := getRandomCells(10, c.Size)
+	rc := getRandomCells(population, c.Size)
 
 	c.State = make([][]string, c.Size)
 	for i := 0; i < c.Size; i++ {
@@ -118,11 +121,13 @@ func live(c Conway) (Conway, bool) {
 				if !(lc == 2 || lc == 3) {
 					moved = true
 					c.State[i][j] = space
+					population--
 				}
 			} else {
 				if lc == 3 {
 					moved = true
 					c.State[i][j] = cell
+					population++
 				}
 			}
 		}
@@ -163,6 +168,7 @@ func show(c Conway) {
 		for j := range innerArray {
 			row += c.State[i][j] + " "
 		}
+
 		tm.Println(row)
 	}
 }
