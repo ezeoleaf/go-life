@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math/rand"
 	"time"
 
@@ -30,7 +29,7 @@ func main() {
 		show(c)
 		tm.Flush() // Call it every time at the end of rendering
 
-		c = live(c)
+		c, _ = live(c)
 
 		time.Sleep(time.Second)
 	}
@@ -39,7 +38,7 @@ func main() {
 func born() Conway {
 	c := Conway{Size: 10}
 
-	rc := getRandomCells(5, c.Size)
+	rc := getRandomCells(10, c.Size)
 
 	c.State = make([][]string, c.Size)
 	for i := 0; i < c.Size; i++ {
@@ -61,6 +60,7 @@ func born() Conway {
 }
 
 func getRandomCells(q int, s int) []string {
+	rand.Seed(time.Now().UTC().UnixNano())
 	rc := make([]string, q)
 	for i := 0; i < q; i++ {
 		for {
@@ -85,20 +85,31 @@ func isIn(s []string, v string) bool {
 	return false
 }
 
-func live(c Conway) Conway {
-	for i, innerArray := range c.State {
+func live(c Conway) (Conway, bool) {
+	nS := make([][]string, c.Size)
+	copy(nS, c.State)
+	moved := false
+	for i, innerArray := range nS {
 		for j := range innerArray {
-			cl := c.State[i][j]
+			cl := nS[i][j]
 			lc := getLivingCells(c, i, j)
 			if cl == cell {
-
+				if !(lc == 2 || lc == 3) {
+					moved = true
+					nS[i][j] = space
+				}
 			} else {
-
+				if lc == 3 {
+					moved = true
+					nS[i][j] = cell
+				}
 			}
 		}
 	}
 
-	return c
+	c.State = nS
+
+	return c, moved
 }
 
 func getLivingCells(c Conway, i int, j int) int {
@@ -109,10 +120,17 @@ func getLivingCells(c Conway, i int, j int) int {
 			ni := i + k
 			nj := j + l
 
-			if (ni < 0 || nj < 0) || (ni > c.Size - 1 || nj > c.Size - 1) {
+			if (ni < 0 || nj < 0) || (ni > c.Size-1 || nj > c.Size-1) {
 				continue
 			}
-			fmt.Println(ni, nj)
+
+			if ni == i && nj == j {
+				continue
+			}
+
+			if c.State[ni][nj] == cell {
+				livingCells++
+			}
 		}
 	}
 
