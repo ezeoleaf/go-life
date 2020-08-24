@@ -19,18 +19,25 @@ type Conway struct {
 
 func main() {
 	tm.Clear() // Clear current screen
-
+	iteration := 0
 	c := born()
+	var moved bool
 	for {
 		// By moving cursor to top-left position we ensure that console output
 		// will be overwritten each time, instead of adding new.
 		tm.MoveCursor(1, 1)
 
 		show(c)
+		c, moved = live(c)
+		if moved {
+			iteration++
+		}
+		tm.Println("Iteration: ", iteration)
+		if !moved {
+			tm.Println("End of simulation")
+			break
+		}
 		tm.Flush() // Call it every time at the end of rendering
-
-		c, _ = live(c)
-
 		time.Sleep(time.Second)
 	}
 }
@@ -86,28 +93,28 @@ func isIn(s []string, v string) bool {
 }
 
 func live(c Conway) (Conway, bool) {
-	nS := make([][]string, c.Size)
-	copy(nS, c.State)
+	// nS := make([][]string, c.Size)
+	// copy(nS, c.State)
 	moved := false
-	for i, innerArray := range nS {
+	for i, innerArray := range c.State {
 		for j := range innerArray {
-			cl := nS[i][j]
+			cl := c.State[i][j]
 			lc := getLivingCells(c, i, j)
 			if cl == cell {
 				if !(lc == 2 || lc == 3) {
 					moved = true
-					nS[i][j] = space
+					c.State[i][j] = space
 				}
 			} else {
 				if lc == 3 {
 					moved = true
-					nS[i][j] = cell
+					c.State[i][j] = cell
 				}
 			}
 		}
 	}
 
-	c.State = nS
+	// c.State = nS
 
 	return c, moved
 }
