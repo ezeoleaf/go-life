@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math/rand"
 	"strconv"
 	"time"
@@ -40,7 +39,7 @@ func main() {
 			break
 		}
 		tm.Flush() // Call it every time at the end of rendering
-		time.Sleep(time.Second * 5)
+		time.Sleep(time.Second * 1)
 	}
 }
 
@@ -114,7 +113,6 @@ func getRandomCells(q int, s int) []string {
 }
 
 func isIn(s []string, v string) bool {
-	fmt.Println(s, v)
 	for _, val := range s {
 		if val == v {
 			return true
@@ -123,15 +121,28 @@ func isIn(s []string, v string) bool {
 	return false
 }
 
+func getCells(state [][]string) []string {
+	cells := []string{}
+	for i, innerArray := range state {
+		for j := range innerArray {
+			if state[i][j] == cell {
+				p := strconv.Itoa(i) + "-" + strconv.Itoa(j)
+				cells = append(cells, p)
+			}
+		}
+	}
+
+	return cells
+}
+
 func live(c Conway) (Conway, bool) {
-	nS := make([][]string, c.Size)
-	copy(nS, c.State)
-	nS = append(c.State[:0:0], c.State...)
+	cells := getCells(c.State)
+
 	moved := false
 	for i, innerArray := range c.State {
 		for j := range innerArray {
-			cl := nS[i][j]
-			lc := getLivingCells(nS, c.Size, i, j)
+			cl := c.State[i][j]
+			lc := getLivingCells(cells, c.Size, i, j)
 			if cl == cell {
 				if !(lc == 2 || lc == 3) {
 					moved = true
@@ -146,12 +157,10 @@ func live(c Conway) (Conway, bool) {
 		}
 	}
 
-	// copy(c.State, nS)
-
 	return c, moved
 }
 
-func getLivingCells(c [][]string, s int, i int, j int) int {
+func getLivingCells(cells []string, s int, i int, j int) int {
 	livingCells := 0
 
 	for k := -1; k <= 1; k++ {
@@ -167,7 +176,8 @@ func getLivingCells(c [][]string, s int, i int, j int) int {
 				continue
 			}
 
-			if c[ni][nj] == cell {
+			s := strconv.Itoa(ni) + "-" + strconv.Itoa(nj)
+			if isIn(cells, s) {
 				livingCells++
 			}
 		}
